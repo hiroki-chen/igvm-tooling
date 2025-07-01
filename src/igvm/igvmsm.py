@@ -124,15 +124,17 @@ class IGVMVeriSMoGenerator(IGVMBaseGenerator):
         segs = []
         rela_name = '.rela'
         rela = self.elf.elf.get_section_by_name(rela_name)
-        for reloc in rela.iter_relocations():
-            # print('Relocation (%s)' % 'RELA' if reloc.is_RELA() else 'REL')
-            # Relocation entry attributes are available through item lookup
-            offset = reloc['r_offset'];
-            r_addend = reloc['r_addend'];
-            val = self._start + r_addend
-            packed_u64 = bytes(ctypes.c_uint64(val))
-            # print("%x %x" %(offset, val))
-            self._kernel = self._kernel[:offset] + packed_u64 + self._kernel[(offset + 8):]
+        
+        if rela:
+            for reloc in rela.iter_relocations():
+                # print('Relocation (%s)' % 'RELA' if reloc.is_RELA() else 'REL')
+                # Relocation entry attributes are available through item lookup
+                offset = reloc['r_offset'];
+                r_addend = reloc['r_addend'];
+                val = self._start + r_addend
+                packed_u64 = bytes(ctypes.c_uint64(val))
+                # print("%x %x" %(offset, val))
+                self._kernel = self._kernel[:offset] + packed_u64 + self._kernel[(offset + 8):]
 
         for i in range(self.elf.elf.num_segments()):
             seg = self.elf.elf.get_segment(i)
